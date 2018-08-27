@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Krystex"]
 
 [dependencies]
+failure = "0.1.2"

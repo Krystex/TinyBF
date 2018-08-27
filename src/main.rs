@@ -1,7 +1,19 @@
+#[macro_use]
+extern crate failure;
+
+//use failure::Error;
 use std::io;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+
+#[derive(Debug, Fail)]
+enum Error {
+    #[fail(display = "Input/Output Error: {}", error)]
+    IoError {error: io::Error},
+    #[fail(display = "No file specified.")]
+    NoFileSpecified,
+}
 
 /// Virtual Machine
 pub struct VM {
@@ -123,13 +135,14 @@ impl VM {
 	}
 }
 
-fn main() -> Result<(), io::Error> {
+fn main() -> Result<(), Error> {
 	let filename = std::env::args()
 		.nth(1)
-		.ok_or(io::Error::new(io::ErrorKind::Other, "No file specified"))?;
+		.ok_or(Error::NoFileSpecified)?;
 
 	let mut vm = VM::new();
-	vm.load_file(filename)?;
+	vm.load_file(filename)
+		.map_err(|e| Error::IoError{ error: e })?;
 	vm.run();
 
 	Ok(())
